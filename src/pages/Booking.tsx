@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, CreditCard, Shield, Calendar, MapPin, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, CreditCard, Shield, Calendar, MapPin, Star, Lock, CheckCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 
@@ -14,13 +15,16 @@ const Booking = () => {
   const bookingData = location.state;
   
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    fullName: "",
     email: "",
     phone: "",
+    checkIn: bookingData?.checkIn || "2024-03-15",
+    checkOut: bookingData?.checkOut || "2024-03-20",
+    guests: bookingData?.guests?.toString() || "2",
     cardNumber: "",
     expiryDate: "",
     cvv: "",
+    cardholderName: "",
     billingAddress: "",
     city: "",
     zipCode: "",
@@ -33,8 +37,16 @@ const Booking = () => {
     location: "Oia, Santorini, Greece",
     rating: 4.9,
     reviews: 127,
-    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=400&q=80"
+    image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=400&q=80",
+    pricePerNight: bookingData?.subtotal ? bookingData.subtotal / (bookingData.nights || 1) : 450
   };
+
+  // Calculate costs from booking data or use defaults
+  const nights = bookingData?.nights || 5;
+  const subtotal = bookingData?.subtotal || (property.pricePerNight * nights);
+  const serviceFee = bookingData?.serviceFee || Math.round(subtotal * 0.12);
+  const taxes = bookingData?.taxes || Math.round(subtotal * 0.08);
+  const total = bookingData?.total || (subtotal + serviceFee + taxes);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -43,10 +55,23 @@ const Booking = () => {
     }));
   };
 
-  const handleBooking = () => {
-    // In a real app, this would process the booking
-    alert("Booking confirmed! You will receive a confirmation email shortly.");
-    navigate("/");
+  const handleConfirmBooking = () => {
+    // In a real app, this would process the booking with payment
+    const confirmationData = {
+      bookingId: 'BK' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+      property,
+      bookingDetails: {
+        ...formData,
+        nights,
+        subtotal,
+        serviceFee,
+        taxes,
+        total
+      },
+      confirmationDate: new Date().toISOString()
+    };
+    
+    navigate("/booking-confirmation", { state: confirmationData });
   };
 
   return (
@@ -69,97 +94,180 @@ const Booking = () => {
             {/* Booking Form */}
             <div className="space-y-8">
               <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">Complete your booking</h1>
-                <p className="text-muted-foreground">You're just a few steps away from your dream vacation!</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-ocean rounded-full flex items-center justify-center">
+                    <Lock className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl font-bold text-foreground">Secure Booking</h1>
+                    <p className="text-muted-foreground">Complete your reservation with confidence</p>
+                  </div>
+                </div>
+                
+                {/* Trust Indicators */}
+                <div className="flex flex-wrap gap-4 mb-8">
+                  <div className="flex items-center gap-2 text-sm text-ocean">
+                    <Shield className="h-4 w-4" />
+                    <span>SSL Encrypted</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-ocean">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Secure Payment</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-ocean">
+                    <Lock className="h-4 w-4" />
+                    <span>Data Protected</span>
+                  </div>
+                </div>
               </div>
               
               {/* Guest Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Guest Information</CardTitle>
+              <Card className="border-ocean/20 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-ocean">Guest Information</CardTitle>
+                  <p className="text-sm text-muted-foreground">Please provide your details for the reservation</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={(e) => handleInputChange("firstName", e.target.value)}
-                        placeholder="John"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={formData.lastName}
-                        onChange={(e) => handleInputChange("lastName", e.target.value)}
-                        placeholder="Doe"
-                      />
-                    </div>
+                  <div>
+                    <Label htmlFor="fullName" className="text-sm font-medium">Full Name *</Label>
+                    <Input
+                      id="fullName"
+                      value={formData.fullName}
+                      onChange={(e) => handleInputChange("fullName", e.target.value)}
+                      placeholder="John Doe"
+                      className="mt-1"
+                      required
+                    />
                   </div>
                   
                   <div>
-                    <Label htmlFor="email">Email Address</Label>
+                    <Label htmlFor="email" className="text-sm font-medium">Email Address *</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
                       placeholder="john.doe@example.com"
+                      className="mt-1"
+                      required
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
                     <Input
                       id="phone"
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange("phone", e.target.value)}
                       placeholder="+1 (555) 123-4567"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Payment Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    Payment Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input
-                      id="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={(e) => handleInputChange("cardNumber", e.target.value)}
-                      placeholder="1234 5678 9012 3456"
+                      className="mt-1"
                     />
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="expiryDate">Expiry Date</Label>
+                      <Label htmlFor="checkin" className="text-sm font-medium">Check-in Date *</Label>
+                      <div className="relative mt-1">
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                        <Input
+                          id="checkin"
+                          type="date"
+                          value={formData.checkIn}
+                          onChange={(e) => handleInputChange("checkIn", e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="checkout" className="text-sm font-medium">Check-out Date *</Label>
+                      <div className="relative mt-1">
+                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                        <Input
+                          id="checkout"
+                          type="date"
+                          value={formData.checkOut}
+                          onChange={(e) => handleInputChange("checkOut", e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="guests" className="text-sm font-medium">Number of Guests *</Label>
+                    <Input
+                      id="guests"
+                      type="number"
+                      min="1"
+                      max="16"
+                      value={formData.guests}
+                      onChange={(e) => handleInputChange("guests", e.target.value)}
+                      className="mt-1"
+                      required
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Payment Information - MOCK ONLY */}
+              <Card className="border-ocean/20 shadow-lg">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-ocean">
+                    <CreditCard className="h-5 w-5" />
+                    Payment Information
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-coral text-coral text-xs">
+                      DEMO MODE
+                    </Badge>
+                    <p className="text-sm text-muted-foreground">Mock payment fields for demonstration</p>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="cardholderName" className="text-sm font-medium">Cardholder Name</Label>
+                    <Input
+                      id="cardholderName"
+                      value={formData.cardholderName}
+                      onChange={(e) => handleInputChange("cardholderName", e.target.value)}
+                      placeholder="John Doe"
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="cardNumber" className="text-sm font-medium">Card Number</Label>
+                    <Input
+                      id="cardNumber"
+                      value={formData.cardNumber}
+                      onChange={(e) => handleInputChange("cardNumber", e.target.value)}
+                      placeholder="4242 4242 4242 4242"
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="expiryDate" className="text-sm font-medium">Expiry Date</Label>
                       <Input
                         id="expiryDate"
                         value={formData.expiryDate}
                         onChange={(e) => handleInputChange("expiryDate", e.target.value)}
                         placeholder="MM/YY"
+                        className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="cvv">CVV</Label>
+                      <Label htmlFor="cvv" className="text-sm font-medium">CVV</Label>
                       <Input
                         id="cvv"
                         value={formData.cvv}
                         onChange={(e) => handleInputChange("cvv", e.target.value)}
                         placeholder="123"
+                        className="mt-1"
                       />
                     </div>
                   </div>
@@ -167,41 +275,45 @@ const Booking = () => {
                   <Separator />
                   
                   <div>
-                    <Label htmlFor="billingAddress">Billing Address</Label>
+                    <Label htmlFor="billingAddress" className="text-sm font-medium">Billing Address</Label>
                     <Input
                       id="billingAddress"
                       value={formData.billingAddress}
                       onChange={(e) => handleInputChange("billingAddress", e.target.value)}
                       placeholder="123 Main Street"
+                      className="mt-1"
                     />
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city" className="text-sm font-medium">City</Label>
                       <Input
                         id="city"
                         value={formData.city}
                         onChange={(e) => handleInputChange("city", e.target.value)}
                         placeholder="New York"
+                        className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="zipCode">Zip Code</Label>
+                      <Label htmlFor="zipCode" className="text-sm font-medium">Zip Code</Label>
                       <Input
                         id="zipCode"
                         value={formData.zipCode}
                         onChange={(e) => handleInputChange("zipCode", e.target.value)}
                         placeholder="10001"
+                        className="mt-1"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="country">Country</Label>
+                      <Label htmlFor="country" className="text-sm font-medium">Country</Label>
                       <Input
                         id="country"
                         value={formData.country}
                         onChange={(e) => handleInputChange("country", e.target.value)}
                         placeholder="United States"
+                        className="mt-1"
                       />
                     </div>
                   </div>
@@ -210,11 +322,12 @@ const Booking = () => {
               
               {/* Security Notice */}
               <div className="flex items-start gap-3 p-4 bg-ocean/5 border border-ocean/20 rounded-lg">
-                <Shield className="h-5 w-5 text-ocean mt-0.5" />
+                <Shield className="h-5 w-5 text-ocean mt-0.5 flex-shrink-0" />
                 <div className="text-sm">
-                  <div className="font-medium text-ocean mb-1">Your payment is secure</div>
+                  <div className="font-medium text-ocean mb-1">Your information is secure</div>
                   <div className="text-muted-foreground">
-                    We use bank-level encryption and never store your payment information.
+                    We use bank-level encryption and never store sensitive payment information. 
+                    This is a demonstration form with mock payment processing.
                   </div>
                 </div>
               </div>
@@ -222,9 +335,10 @@ const Booking = () => {
             
             {/* Booking Summary */}
             <div className="space-y-6">
-              {/* Property Summary */}
-              <Card className="sticky top-24">
+              <Card className="sticky top-24 border-ocean/20 shadow-xl">
                 <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold mb-6 text-ocean">Booking Summary</h2>
+                  
                   <div className="flex gap-4 mb-6">
                     <img 
                       src={property.image}
@@ -240,7 +354,7 @@ const Booking = () => {
                       <div className="flex items-center">
                         <Star className="h-4 w-4 fill-current text-yellow-400 mr-1" />
                         <span className="font-medium">{property.rating}</span>
-                        <span className="text-muted-foreground text-sm ml-1">({property.reviews})</span>
+                        <span className="text-muted-foreground text-sm ml-1">({property.reviews} reviews)</span>
                       </div>
                     </div>
                   </div>
@@ -248,27 +362,33 @@ const Booking = () => {
                   <Separator className="my-6" />
                   
                   {/* Trip Details */}
-                  <div className="space-y-4 mb-6">
-                    <h4 className="font-semibold">Trip Details</h4>
+                  <div className="space-y-3 mb-6">
+                    <h4 className="font-semibold text-ocean">Trip Details</h4>
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Dates</span>
+                        <span>Check-in</span>
                       </div>
-                      <span className="font-medium">
-                        {bookingData?.checkIn} - {bookingData?.checkOut}
-                      </span>
+                      <span className="font-medium">{formData.checkIn}</span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>Check-out</span>
+                      </div>
+                      <span className="font-medium">{formData.checkOut}</span>
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <span>Guests</span>
-                      <span className="font-medium">{bookingData?.guests || 2}</span>
+                      <span className="font-medium">{formData.guests}</span>
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <span>Nights</span>
-                      <span className="font-medium">{bookingData?.nights || 5}</span>
+                      <span className="font-medium">{nights}</span>
                     </div>
                   </div>
                   
@@ -276,43 +396,63 @@ const Booking = () => {
                   
                   {/* Price Breakdown */}
                   <div className="space-y-3 mb-6">
-                    <h4 className="font-semibold">Price Breakdown</h4>
+                    <h4 className="font-semibold text-ocean">Price Details</h4>
                     
                     <div className="flex justify-between">
-                      <span>${bookingData?.subtotal ? bookingData.subtotal / (bookingData.nights || 1) : 450} × {bookingData?.nights || 5} nights</span>
-                      <span>${bookingData?.subtotal || 2250}</span>
+                      <span>${property.pricePerNight} × {nights} nights</span>
+                      <span>${subtotal}</span>
                     </div>
                     
                     <div className="flex justify-between">
                       <span>Service fee</span>
-                      <span>${bookingData?.serviceFee || 270}</span>
+                      <span>${serviceFee}</span>
                     </div>
                     
                     <div className="flex justify-between">
-                      <span>Taxes</span>
-                      <span>${bookingData?.taxes || 180}</span>
+                      <span>Taxes & fees</span>
+                      <span>${taxes}</span>
                     </div>
                     
                     <Separator />
                     
-                    <div className="flex justify-between font-semibold text-lg">
+                    <div className="flex justify-between font-bold text-lg text-ocean">
                       <span>Total (USD)</span>
-                      <span>${bookingData?.total || 2700}</span>
+                      <span>${total}</span>
                     </div>
                   </div>
                   
                   {/* Confirm Booking Button */}
                   <Button 
-                    onClick={handleBooking}
+                    onClick={handleConfirmBooking}
                     size="lg" 
-                    className="w-full bg-gradient-to-r from-ocean to-ocean-light hover:from-ocean-light hover:to-ocean text-white"
+                    className="w-full bg-gradient-to-r from-ocean to-ocean-light hover:from-ocean-light hover:to-ocean text-white shadow-lg"
+                    disabled={!formData.fullName || !formData.email}
                   >
+                    <Shield className="h-4 w-4 mr-2" />
                     Confirm Booking
                   </Button>
                   
                   <p className="text-xs text-muted-foreground text-center mt-3">
-                    By clicking "Confirm Booking", you agree to our Terms of Service and Privacy Policy.
+                    By confirming, you agree to our Terms of Service and Privacy Policy.
                   </p>
+                  
+                  {/* Trust Badges */}
+                  <div className="mt-6 pt-4 border-t">
+                    <div className="grid grid-cols-3 gap-4 text-center text-xs">
+                      <div className="flex flex-col items-center gap-1">
+                        <Shield className="h-4 w-4 text-ocean" />
+                        <span className="text-muted-foreground">Secure</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <CheckCircle className="h-4 w-4 text-ocean" />
+                        <span className="text-muted-foreground">Verified</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <Lock className="h-4 w-4 text-ocean" />
+                        <span className="text-muted-foreground">Protected</span>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
