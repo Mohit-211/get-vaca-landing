@@ -63,11 +63,7 @@ const Navigation = () => {
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <img
-            src="/public/logo.png"
-            alt="Get Vaca Logo"
-            className="h-auto w-20"
-          />
+          <img src="/logo.png" alt="Get Vaca Logo" className="h-auto w-20" />
         </Link>
 
         {/* Desktop Nav */}
@@ -139,11 +135,16 @@ const Navigation = () => {
               </div>
             )}
 
-            <Link to="/list-property">
+            {/* CTA - Desktop */}
+            <a
+              href="https://getvacahost.madira.xyz"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button className="font-inter font-medium bg-gradient-to-r from-coral to-sunset hover:from-sunset hover:to-coral text-white shadow-lg hover:shadow-xl transition-all duration-300">
                 List Your Property
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -175,7 +176,7 @@ const Navigation = () => {
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-100">
                 <img
-                  src="/public/logo.png"
+                  src="/logo.png"
                   alt="Get Vaca Logo"
                   className="h-7 w-auto"
                 />
@@ -217,10 +218,12 @@ const Navigation = () => {
                 </nav>
               </div>
 
-              {/* CTA */}
+              {/* CTA - Mobile */}
               <div className="p-6">
-                <Link
-                  to="/list-property"
+                <a
+                  href="https://getvacahost.madira.xyz"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Button
@@ -229,7 +232,7 @@ const Navigation = () => {
                   >
                     List Your Property
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
           </div>
