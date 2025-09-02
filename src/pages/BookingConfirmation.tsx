@@ -1,283 +1,221 @@
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Calendar, MapPin, Star, Download, Mail, Home, Phone } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle, Calendar, MapPin, Star, Home, BookOpen, Sparkles } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const BookingConfirmation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const confirmationData = location.state;
+  const { toast } = useToast();
+  const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
     // If no confirmation data, redirect to home
     if (!confirmationData) {
       navigate("/");
+      return;
     }
-  }, [confirmationData, navigate]);
+
+    // Show success toast
+    toast({
+      title: "Booking Confirmed! 🎉",
+      description: "Get ready for an amazing vacation experience!",
+    });
+
+    // Hide confetti after animation
+    const timer = setTimeout(() => setShowConfetti(false), 3000);
+    return () => clearTimeout(timer);
+  }, [confirmationData, navigate, toast]);
 
   if (!confirmationData) {
     return null;
   }
 
-  const { bookingId, property, bookingDetails, confirmationDate } = confirmationData;
-  const confirmationDateFormatted = new Date(confirmationDate).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const { bookingId, property, bookingDetails } = confirmationData;
 
-  const handlePrintConfirmation = () => {
-    window.print();
-  };
+  // Calculate nights
+  const checkInDate = new Date(bookingDetails.checkIn);
+  const checkOutDate = new Date(bookingDetails.checkOut);
+  const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)));
 
-  const handleEmailConfirmation = () => {
-    // In a real app, this would send an email
-    alert("Confirmation email sent to " + bookingDetails.email);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
-    <div className="min-h-screen bg-sand/30">
+    <div className="min-h-screen bg-gradient-to-br from-ocean/5 via-background to-coral/5 relative overflow-hidden">
       <Navigation />
+      
+      {/* Confetti Background Animation */}
+      {showConfetti && (
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="animate-bounce absolute top-20 left-10 text-coral">
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <div className="animate-bounce absolute top-32 right-16 text-ocean" style={{ animationDelay: '0.5s' }}>
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="animate-bounce absolute top-48 left-1/4 text-sunset" style={{ animationDelay: '1s' }}>
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div className="animate-bounce absolute top-40 right-1/4 text-coral" style={{ animationDelay: '1.5s' }}>
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="animate-bounce absolute top-60 left-20 text-ocean" style={{ animationDelay: '2s' }}>
+            <Sparkles className="h-6 w-6" />
+          </div>
+          <div className="animate-bounce absolute top-28 right-32 text-sunset" style={{ animationDelay: '0.8s' }}>
+            <Sparkles className="h-5 w-5" />
+          </div>
+        </div>
+      )}
       
       <main className="pt-20 pb-12">
         <div className="container mx-auto px-6 max-w-4xl">
-          {/* Success Header */}
-          <div className="text-center mb-12">
-            <div className="w-20 h-20 bg-gradient-to-r from-ocean to-ocean-light rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-10 w-10 text-white" />
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            {/* Success Icon with Animation */}
+            <div className="relative mb-8">
+              <div className="w-32 h-32 bg-gradient-to-r from-ocean to-ocean-light rounded-full flex items-center justify-center mx-auto animate-scale-in shadow-2xl">
+                <CheckCircle className="h-16 w-16 text-white animate-pulse" />
+              </div>
+              
+              {/* Ripple Effect */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-32 h-32 border-4 border-ocean/30 rounded-full animate-ping"></div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center" style={{ animationDelay: '0.5s' }}>
+                <div className="w-40 h-40 border-2 border-ocean/20 rounded-full animate-ping"></div>
+              </div>
             </div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Booking Confirmed!</h1>
-            <p className="text-xl text-muted-foreground mb-4">
-              Your reservation has been successfully processed
+            
+            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-ocean via-ocean-light to-coral bg-clip-text text-transparent mb-4 animate-fade-in">
+              Your booking is confirmed!
+            </h1>
+            
+            <p className="text-xl text-muted-foreground mb-2 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              Pack your bags! Your dream vacation awaits.
             </p>
-            <Badge className="bg-ocean text-white px-4 py-2 text-lg">
+            
+            <div className="text-lg font-medium text-ocean animate-fade-in" style={{ animationDelay: '0.6s' }}>
               Booking ID: {bookingId}
-            </Badge>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Confirmation Details */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Property Information */}
-              <Card className="border-ocean/20 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-ocean">Your Reservation</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-4 mb-6">
-                    <img 
-                      src={property.image}
-                      alt={property.title}
-                      className="w-24 h-24 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-xl mb-2">{property.title}</h3>
-                      <div className="flex items-center text-muted-foreground mb-2">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span>{property.location}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 fill-current text-yellow-400 mr-1" />
-                        <span className="font-medium">{property.rating}</span>
-                        <span className="text-muted-foreground ml-1">({property.reviews} reviews)</span>
-                      </div>
+          {/* Booking Summary Card */}
+          <div className="max-w-2xl mx-auto mb-12">
+            <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm animate-fade-in" style={{ animationDelay: '0.9s' }}>
+              <CardContent className="p-8">
+                <div className="flex gap-6 mb-8">
+                  <img 
+                    src={property.image}
+                    alt={property.title}
+                    className="w-24 h-24 rounded-xl object-cover shadow-lg"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-2xl font-bold text-foreground mb-3">{property.title}</h3>
+                    <div className="flex items-center text-muted-foreground mb-2">
+                      <MapPin className="h-5 w-5 mr-2" />
+                      <span className="text-lg">{property.location}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Star className="h-5 w-5 fill-current text-yellow-400 mr-2" />
+                      <span className="text-lg font-medium">{property.rating}</span>
+                      <span className="text-muted-foreground ml-2">({property.reviews} reviews)</span>
                     </div>
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold mb-2 text-ocean">Check-in</h4>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{bookingDetails.checkIn}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">After 3:00 PM</p>
+                {/* Booking Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="bg-sand rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="h-5 w-5 text-ocean mr-2" />
+                      <span className="font-semibold text-ocean">Check-in</span>
                     </div>
-                    
-                    <div>
-                      <h4 className="font-semibold mb-2 text-ocean">Check-out</h4>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{bookingDetails.checkOut}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">Before 11:00 AM</p>
+                    <div className="text-lg font-medium">{formatDate(bookingDetails.checkIn)}</div>
+                    <div className="text-sm text-muted-foreground">After 3:00 PM</div>
+                  </div>
+                  
+                  <div className="bg-sand rounded-lg p-4">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="h-5 w-5 text-ocean mr-2" />
+                      <span className="font-semibold text-ocean">Check-out</span>
                     </div>
-                    
-                    <div>
-                      <h4 className="font-semibold mb-2 text-ocean">Guests</h4>
-                      <span>{bookingDetails.guests} {bookingDetails.guests === "1" ? "guest" : "guests"}</span>
-                    </div>
-                    
-                    <div>
-                      <h4 className="font-semibold mb-2 text-ocean">Duration</h4>
-                      <span>{bookingDetails.nights} {bookingDetails.nights === 1 ? "night" : "nights"}</span>
+                    <div className="text-lg font-medium">{formatDate(bookingDetails.checkOut)}</div>
+                    <div className="text-sm text-muted-foreground">Before 11:00 AM</div>
+                  </div>
+                  
+                  <div className="bg-sand rounded-lg p-4">
+                    <div className="font-semibold text-ocean mb-2">Guests</div>
+                    <div className="text-lg font-medium">
+                      {bookingDetails.guests} {parseInt(bookingDetails.guests) === 1 ? 'Guest' : 'Guests'}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  <div className="bg-sand rounded-lg p-4">
+                    <div className="font-semibold text-ocean mb-2">Duration</div>
+                    <div className="text-lg font-medium">
+                      {nights} {nights === 1 ? 'Night' : 'Nights'}
+                    </div>
+                  </div>
+                </div>
 
-              {/* Guest Information */}
-              <Card className="border-ocean/20 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-ocean">Guest Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-semibold mb-1">Primary Guest</h4>
-                      <p className="text-foreground">{bookingDetails.fullName}</p>
+                {/* Total Price */}
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-ocean/10 to-coral/10 rounded-xl p-6 border border-ocean/20">
+                    <div className="text-sm text-muted-foreground mb-2">Total Amount Paid</div>
+                    <div className="text-4xl font-bold bg-gradient-to-r from-ocean to-coral bg-clip-text text-transparent">
+                      ${bookingDetails.total}
                     </div>
-                    
-                    <div>
-                      <h4 className="font-semibold mb-1">Contact Email</h4>
-                      <p className="text-foreground">{bookingDetails.email}</p>
-                    </div>
-                    
-                    {bookingDetails.phone && (
-                      <div>
-                        <h4 className="font-semibold mb-1">Phone Number</h4>
-                        <p className="text-foreground">{bookingDetails.phone}</p>
-                      </div>
-                    )}
+                    <div className="text-sm text-muted-foreground mt-1">USD • All fees included</div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              {/* Important Information */}
-              <Card className="border-ocean/20 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-ocean">Important Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="bg-ocean/5 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2 text-ocean">Check-in Instructions</h4>
-                    <p className="text-sm text-muted-foreground">
-                      You'll receive detailed check-in instructions 24 hours before your arrival. 
-                      The property offers self check-in with a secure keypad entry system.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-sand p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2">Cancellation Policy</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Free cancellation until 48 hours before check-in. 
-                      After that, you'll be charged for the first night.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-coral/5 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2 text-coral">House Rules</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Check-in: 3:00 PM - 10:00 PM</li>
-                      <li>• Checkout: 11:00 AM</li>
-                      <li>• No smoking</li>
-                      <li>• No parties or events</li>
-                      <li>• Maximum {bookingDetails.guests} guests</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in" style={{ animationDelay: '1.2s' }}>
+            <Button 
+              onClick={() => navigate("/")}
+              size="lg"
+              className="bg-gradient-to-r from-ocean to-ocean-light hover:from-ocean-light hover:to-ocean text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Home className="h-5 w-5 mr-3" />
+              Back to Homepage
+            </Button>
+            
+            <Button 
+              onClick={() => navigate("/my-bookings")}
+              variant="outline"
+              size="lg"
+              className="border-2 border-ocean text-ocean hover:bg-ocean hover:text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <BookOpen className="h-5 w-5 mr-3" />
+              View My Bookings
+            </Button>
+          </div>
 
-            {/* Booking Summary & Actions */}
-            <div className="space-y-6">
-              {/* Price Summary */}
-              <Card className="border-ocean/20 shadow-lg sticky top-24">
-                <CardHeader>
-                  <CardTitle className="text-ocean">Booking Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-sm text-muted-foreground">
-                    Confirmed on {confirmationDateFormatted}
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span>${property.pricePerNight} × {bookingDetails.nights} nights</span>
-                      <span>${bookingDetails.subtotal}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span>Service fee</span>
-                      <span>${bookingDetails.serviceFee}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span>Taxes & fees</span>
-                      <span>${bookingDetails.taxes}</span>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div className="flex justify-between font-bold text-lg text-ocean">
-                      <span>Total Paid</span>
-                      <span>${bookingDetails.total}</span>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Action Buttons */}
-                  <div className="space-y-3">
-                    <Button 
-                      onClick={handleEmailConfirmation}
-                      variant="outline" 
-                      className="w-full border-ocean text-ocean hover:bg-ocean hover:text-white"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Email Confirmation
-                    </Button>
-                    
-                    <Button 
-                      onClick={handlePrintConfirmation}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Download/Print
-                    </Button>
-                    
-                    <Button 
-                      onClick={() => navigate("/")}
-                      className="w-full bg-gradient-to-r from-ocean to-ocean-light hover:from-ocean-light hover:to-ocean text-white"
-                    >
-                      <Home className="h-4 w-4 mr-2" />
-                      Back to Home
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Support Contact */}
-              <Card className="border-ocean/20 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-ocean">Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground">
-                    Have questions about your booking? We're here to help 24/7.
-                  </p>
-                  
-                  <Button variant="outline" className="w-full justify-start">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Support: +1 (555) 123-4567
-                  </Button>
-                  
-                  <Button variant="outline" className="w-full justify-start">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Email: support@getvaca.com
-                  </Button>
-                </CardContent>
-              </Card>
+          {/* Celebration Message */}
+          <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '1.5s' }}>
+            <div className="max-w-lg mx-auto">
+              <div className="text-lg text-muted-foreground mb-4">
+                🎉 Get ready for an unforgettable experience! 🎉
+              </div>
+              <p className="text-sm text-muted-foreground">
+                You'll receive a confirmation email with check-in instructions shortly.
+                Have questions? Our 24/7 support team is here to help.
+              </p>
             </div>
           </div>
         </div>
