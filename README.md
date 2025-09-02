@@ -1,73 +1,41 @@
-# Welcome to your Lovable project
+🌴 Get Vaca
 
-## Project info
+#Get Vaca is a modern travel booking platform MVP where users can:
+Search and book hotels, villas, and yachts.
+Explore destinations and travel inspiration via blog.
+Securely complete bookings with a simple checkout flow.
+(For Hosts) Add and manage properties, availability, bookings, and earnings through a dashboard.
 
-**URL**: https://lovable.dev/projects/555f37c5-b913-4c50-b49a-b8ae8db9151c
+🚀 Tech Stack
 
-## How can I edit this code?
+React (TypeScript)
 
-There are several ways of editing your application.
+Vite
 
-**Use Lovable**
+Tailwind CSS + shadcn-ui
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/555f37c5-b913-4c50-b49a-b8ae8db9151c) and start prompting.
+🛠 Development
 
-Changes made via Lovable will be committed automatically to this repo.
+Clone and run locally:
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+git clone <YOUR_REPO_URL>
+cd get-vaca
+npm install
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+🌐 Deployment
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Deployed on [Vercel / Netlify / Your Hosting Choice].
+Supports custom domains.
 
-**Use GitHub Codespaces**
+📌 Project Roadmap
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+✅ MVP for guests (search, booking, blog).
 
-## What technologies are used for this project?
+✅ Host dashboard (listings, calendar, earnings).
 
-This project is built with:
+🔜 Phase 2: Restaurants, experiences, rentals, transfers.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+📄 License
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/555f37c5-b913-4c50-b49a-b8ae8db9151c) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+© 2025 Get Vaca. All rights reserved.
