@@ -16,9 +16,11 @@ const Navigation = () => {
           <Link to="/blog" className="text-white/90 hover:text-white transition-colors">
             Blog
           </Link>
-          <Button variant="outline" className="text-white border-white/30 hover:bg-white/10">
-            Sign In
-          </Button>
+          <Link to="/auth">
+            <Button variant="outline" className="text-white border-white/30 hover:bg-white/10">
+              Sign In
+            </Button>
+          </Link>
         </div>
       </div>
     </nav>
